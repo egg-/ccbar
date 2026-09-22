@@ -21,6 +21,9 @@ import time
 WARN, CRIT = 60, 85
 BAR_WIDTH = 5
 
+FIVE_HOUR = 5 * 3600
+SEVEN_DAY = 7 * 86400
+
 RESET = "\033[0m"
 DIM = "\033[2m"
 GREEN, YELLOW, RED = "\033[32m", "\033[33m", "\033[31m"
@@ -56,25 +59,46 @@ def until(epoch, now=None):
     return f"{m}m"
 
 
-def quota(label, d):
+def project(pct, resets_at, window, now=None):
+    """Usage at window close if the current burn rate holds.
+
+    Claude Code sends when the window resets but not when it opened, so the
+    start is resets_at - window. Early in a window a couple of calls look like
+    an infinite rate, so hold off until enough of it has elapsed to mean
+    anything.
+    """
+    if not resets_at or not pct:
+        return None
+    now = time.time() if now is None else now
+    elapsed = now - (resets_at - window)
+    frac = elapsed / window
+    if frac < 0.1 or frac > 1:
+        return None
+    return min(999, round(pct / frac))
+
+
+def quota(label, d, window):
     """One quota segment, or None when Claude Code sent no rate limits."""
     if not d:
         return None
     pct = d.get("used_percentage")
     if pct is None:
         return None
+    resets_at = d.get("resets_at")
     c = severity(pct)
-    left = until(d.get("resets_at"))
+    left = until(resets_at)
     tail = f" {DIM}{left}{RESET}" if left else ""
-    return f"{DIM}{label}{RESET} {c}{bar(pct)} {pct:>3.0f}%{RESET}{tail}"
+    eta = project(pct, resets_at, window)
+    fore = f" {severity(eta)}→{eta}%{RESET}" if eta is not None else ""
+    return f"{DIM}{label}{RESET} {c}{bar(pct)} {pct:>3.0f}%{RESET}{fore}{tail}"
 
 
 def render(d):
     seg = []
 
     limits = d.get("rate_limits") or {}
-    seg += [s for s in (quota("5h", limits.get("five_hour")),
-                        quota("7d", limits.get("seven_day"))) if s]
+    seg += [s for s in (quota("5h", limits.get("five_hour"), FIVE_HOUR),
+                        quota("7d", limits.get("seven_day"), SEVEN_DAY)) if s]
 
     ctx = d.get("context_window") or {}
     name = (d.get("model") or {}).get("display_name")
@@ -106,6 +130,15 @@ def selftest():
     assert until(now + 3600 * 2 + 60 * 23, now) == "2h23m"
     assert until(now + 86400 * 3 + 3600 * 4, now) == "3d04h"
     assert until(None) == ""
+
+    # Projection: half a window gone with 30% used lands at 60%.
+    half = now + FIVE_HOUR / 2
+    assert project(30, half, FIVE_HOUR, now) == 60
+    assert project(80, half, FIVE_HOUR, now) == 160          # over cap is worth saying
+    # Too early in the window to extrapolate, and no window in progress.
+    assert project(5, now + FIVE_HOUR * 0.95, FIVE_HOUR, now) is None
+    assert project(50, None, FIVE_HOUR, now) is None
+    assert project(0, half, FIVE_HOUR, now) is None
 
     # A blob missing every optional key must still render, not crash.
     assert render({}) == ""

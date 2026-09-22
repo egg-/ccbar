@@ -3,7 +3,7 @@
 A one-file status line for Claude Code. No daemon, no cache, no network, no dependencies.
 
 ```
-5h ██░░░  35% 3h22m │ 7d ███░░  62% 2d19h │ Opus 5 20% │ $11.82
+5h ██░░░  36% →108% 3h19m │ 7d ███░░  62% →103% 2d19h │ Opus 5 12% │ $5.23
 ```
 
 ## Why
@@ -50,6 +50,15 @@ but the file and those four lines.
 core; at 1s it costs 2%. Quota percentages do not move fast enough to be worth
 the difference.
 
+## The `→NN%` projection
+
+Where usage lands at window close if the current burn rate holds. Claude Code
+sends when a window *resets* but not when it opened, so the start is
+`resets_at - window` and the rest is `used ÷ elapsed_fraction`.
+
+Two calls in the first minute of a window look like an infinite rate, so the
+projection stays hidden until 10% of the window has passed.
+
 ## Configure
 
 Edit the constants at the top of the file:
@@ -72,8 +81,9 @@ no quota exists, the quota segments simply disappear.
 | segment | source field |
 |---|---|
 | `5h` / `7d` bars | `rate_limits.{five_hour,seven_day}` |
+| `→NN%` projection | derived: usage ÷ fraction of the window elapsed |
 | model + context % | `model.display_name`, `context_window.used_percentage` |
-| cost | `cost.total_cost_usd` |
+| cost | `cost.total_cost_usd` — **this session only**, not a daily total |
 
 The stdin blob carries more than this — `prompt_cache`, `effort`,
 `session_name`, `thinking`, lines added/removed. Add a segment by reading the
