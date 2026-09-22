@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="104" viewBox="0 0 660 104" role="img" aria-label="ccbar status line: 5h 36 percent projected 104 percent, 7d 62 percent projected 103 percent, Opus 5 at 12 percent context, 5 dollars 23 cents this session">
+  <style>
+    .t { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; font-size: 15px; }
+    .dim  { fill: #7d8590 }
+    .fg   { fill: #e6edf3 }
+    .ok   { fill: #3fb950 }
+    .warn { fill: #d29922 }
+    .hot  { fill: #f85149 }
+    .cap  { font-family: "SF Mono", Menlo, monospace; font-size: 11px; fill: #6e7681 }
+  </style>
+  <rect width="660" height="104" rx="8" fill="#0d1117"/>
+  <circle cx="22" cy="21" r="5" fill="#f85149"/>
+  <circle cx="40" cy="21" r="5" fill="#d29922"/>
+  <circle cx="58" cy="21" r="5" fill="#3fb950"/>
+  <text x="80" y="25" class="cap">claude code</text>
+
+  <text x="22" y="62" class="t" xml:space="preserve"><tspan class="dim">5h </tspan><tspan class="ok">██░░░  36%</tspan><tspan class="hot"> →104%</tspan><tspan class="dim"> 3h15m</tspan><tspan class="dim"> │ </tspan><tspan class="dim">7d </tspan><tspan class="warn">███░░  62%</tspan><tspan class="hot"> →103%</tspan><tspan class="dim"> 2d19h</tspan><tspan class="dim"> │ </tspan><tspan class="fg">Opus 5 </tspan><tspan class="ok">12%</tspan><tspan class="dim"> │ </tspan><tspan class="dim">$5.23</tspan></text>
+
+  <text x="22" y="88" class="cap">└ 5h quota ──────────────┘ └ 7d quota ──────────────┘ └ context ─┘ └ session ┘</text>
+</svg>
