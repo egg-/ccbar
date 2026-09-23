@@ -1,0 +1,210 @@
+---
+// Home. Section copy lives here as plain data, not in a collection: editing the page
+// means editing one file, and nothing else reads these strings.
+import Base from '../layouts/Base.astro';
+import Section from '../components/common/Section.astro';
+import StatusLineFrame from '../components/sections/StatusLineFrame.astro';
+
+const hero = {
+  eyebrow: 'macOS and Linux · stdlib Python',
+  heading: 'A one-file status line for Claude Code.',
+  lead: 'No daemon, no cache, no network, no dependencies. Claude Code already pipes everything a status line needs onto stdin — quota, reset times, context window, cost, model. ccbar reads that and prints one line.',
+  actions: [
+    { label: 'Install', href: '#install', primary: true },
+    { label: 'View on GitHub', href: 'https://github.com/egg-/ccbar' },
+  ],
+  footnote: '~150 lines · MIT · no install size beyond the file itself',
+};
+
+const comparison = [
+  { row: 'resident processes', ccbar: '0', daemon: '3+' },
+  { row: 'install size', ccbar: '5 KB', daemon: '~28 MB' },
+  { row: 'per tick', ccbar: '~22 ms', daemon: '~86 ms' },
+  { row: 'dependencies', ccbar: 'none', daemon: 'Python runtime bundle' },
+];
+
+const steps = [
+  {
+    command: 'curl -fsSL raw.githubusercontent.com/egg-/ccbar/main/ccbar.py -o ~/.local/bin/ccbar\nchmod +x ~/.local/bin/ccbar',
+    detail: 'Drop the file somewhere on PATH and make it executable. That is the whole install.',
+  },
+  {
+    command:
+      '{\n  "statusLine": {\n    "type": "command",\n    "command": "~/.local/bin/ccbar",\n    "refreshInterval": 10\n  }\n}',
+    detail: 'Point ~/.claude/settings.json at it. refreshInterval is in seconds — a 22 ms tick costs about 0.2% of one core at 10s.',
+  },
+  {
+    command: 'Restart Claude Code once.',
+    detail: "That's it. Each tick is a fresh process, so edits to the script take effect on the next tick — no restart, no reload.",
+  },
+];
+
+const segments = [
+  {
+    q: '5h ██░░░  36% — plan quota',
+    a: 'Share of the rolling 5-hour and 7-day limits already spent, from rate_limits.five_hour and rate_limits.seven_day. The bar is the same number as the digits. Green below 60%, yellow to 85%, red above. On a third-party relay or Bedrock/Vertex there is no quota, so both segments disappear rather than showing zeros.',
+  },
+  {
+    q: '→104% — projection',
+    a: "Where usage lands at window close if the current burn rate holds. Over 100% means you run out before the window resets. It extrapolates the whole window's average forward in a straight line — treat it as a direction, not a forecast. Hidden until 10% of the window has passed.",
+  },
+  {
+    q: '3h15m — time to reset',
+    a: 'Counts down to resets_at. Reads 2d19h past a day, 14m under an hour.',
+  },
+  {
+    q: 'Opus 5 12% — model and context window',
+    a: 'How much of the context window this conversation has filled (context_window.used_percentage), not quota. It only climbs as a conversation grows; a new conversation starts over at zero.',
+  },
+  {
+    q: '$5.23 — session cost',
+    a: 'cost.total_cost_usd — what this conversation has cost so far, not a daily or monthly total. Resets with each new session. Dimmed because it is the least actionable number on the line.',
+  },
+];
+
+const capabilities = [
+  {
+    name: 'No config file',
+    detail: 'Edit two constants at the top of the file — WARN/CRIT thresholds and BAR_WIDTH. Less machinery than a config format, a parser, and a config set subcommand.',
+  },
+  {
+    name: 'Add your own segment',
+    detail: 'The stdin blob carries more than the bar shows — prompt_cache, effort.level, session_name, thinking.enabled. Read the field and append to seg in render().',
+  },
+  {
+    name: 'Graceful degradation',
+    detail: 'Every segment is dropped when its data is absent, so a partial blob renders a shorter line instead of erroring. Malformed JSON prints nothing at all.',
+  },
+  {
+    name: 'Self-test',
+    detail: 'python3 ccbar.py --selftest, or pipe a JSON payload straight to it to see one line rendered.',
+  },
+];
+---
+
+<Base description="A one-file status line for Claude Code. No daemon, no cache, no network, no dependencies.">
+  <div class="shell">
+    <div class="shell-body pt-14 pb-16 sm:pt-20">
+      <p class="text-faint font-mono text-[11px]">{hero.eyebrow}</p>
+      <h1 class="mt-4 text-4xl font-medium tracking-[-0.028em] sm:text-5xl">{hero.heading}</h1>
+      <p class="text-muted mt-5 text-lg">{hero.lead}</p>
+      <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        {hero.actions.map((action) =>
+          action.primary ? (
+            <a class="btn" href={action.href}>
+              {action.label}
+            </a>
+          ) : (
+            <a class="text-sm underline underline-offset-[0.15em]" href={action.href}>
+              {action.label}
+            </a>
+          ),
+        )}
+      </div>
+      <p class="text-faint mt-7 font-mono text-[11px]">{hero.footnote}</p>
+    </div>
+
+    <div class="rail border-border border-t pt-16">
+      <Section label="Why" id="why">
+        <h2 class="text-2xl font-medium tracking-[-0.028em]">Reading that blob and printing one line is the whole job.</h2>
+        <p class="text-muted mt-4">
+          So ccbar is ~150 lines of stdlib Python in a single file. It spawns per tick, prints, and
+          exits. Nothing stays resident.
+        </p>
+        <div class="mt-7">
+          <StatusLineFrame />
+        </div>
+        <table class="border-border mt-7 w-full border-t text-sm">
+          <thead>
+            <tr class="border-border border-b text-left">
+              <th class="py-2 font-medium"></th>
+              <th class="py-2 font-medium">ccbar</th>
+              <th class="text-muted py-2 font-medium">a daemon-backed bar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparison.map((row) => (
+              <tr class="border-border border-b">
+                <td class="text-muted py-2.5">{row.row}</td>
+                <td class="py-2.5 tabular-nums">{row.ccbar}</td>
+                <td class="text-muted py-2.5 tabular-nums">{row.daemon}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Section>
+
+      <Section label="Install" id="install" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-[-0.028em]">Three steps, then it is running.</h2>
+        <ol class="border-border mt-7 border-t">
+          {steps.map((step, i) => (
+            <li class="border-border grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-b py-4">
+              <span class="text-faint pt-0.5 font-mono text-[11px]">{i + 1}</span>
+              <div>
+                <pre class="border-border bg-surface overflow-x-auto rounded-[3px] border px-3 py-2 font-mono text-sm">{step.command}</pre>
+                <p class="text-muted mt-2 text-sm">{step.detail}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section label="Reading the bar" id="reading" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-[-0.028em]">
+          Three things that reset on different clocks.
+        </h2>
+        <p class="text-muted mt-4">
+          Quota resets on its own rolling schedule; context and cost reset when you start a new
+          conversation. Worth knowing which is which before you react to a red number.
+        </p>
+        <div class="border-border mt-6 border-t">
+          {segments.map((item) => (
+            <details class="disclosure border-border border-b">
+              <summary class="py-3.5 font-mono text-sm font-medium">{item.q}</summary>
+              <p class="text-muted pb-4 text-sm">{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </Section>
+
+      <Section label="Configure" id="configure" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-[-0.028em]">
+          Four things a fuller bar would make you configure.
+        </h2>
+        <dl class="mt-6 grid gap-x-8 sm:grid-cols-2">
+          {capabilities.map((item) => (
+            <div class="border-border border-t py-4">
+              <dt class="text-sm font-medium">{item.name}</dt>
+              <dd class="text-muted mt-1.5 text-sm">{item.detail}</dd>
+            </div>
+          ))}
+        </dl>
+        <p class="mt-6 text-sm">
+          <a href="https://github.com/leeguooooo/claude-code-usage-bar">
+            leeguooooo/claude-code-usage-bar
+          </a>{' '}
+          <span class="text-muted">
+            is the fuller take on this idea — themes, styles, a desktop HUD, a daemon render path.
+            Reach for it if you want those.
+          </span>
+        </p>
+      </Section>
+    </div>
+
+    <div class="shell-body border-border mt-24 border-t pt-10">
+      <h2 class="text-xl font-medium tracking-[-0.028em]">Drop the file in and point Claude Code at it.</h2>
+      <p class="text-muted mt-3">
+        That's the install — there is nothing to uninstall but the file and four lines in
+        settings.json.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <a class="btn" href="#install">
+          Install
+        </a>
+        <a class="text-sm underline underline-offset-[0.15em]" href="https://github.com/egg-/ccbar">
+          Read the source
+        </a>
+      </div>
+    </div>
+  </div>
+</Base>
