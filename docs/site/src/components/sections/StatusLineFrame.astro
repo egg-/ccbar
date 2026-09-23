@@ -1,9 +1,17 @@
 ---
 // A drawing of the bar itself, in rules and mono text rather than a screenshot: no asset
 // to license, no second file to re-shoot for dark mode, and it stays sharp at any width.
+// Severity thresholds and grouping mirror ccbar.py's render() line for line (WARN/CRIT =
+// 60/85; the bar+percentage share one severity, the projection has its own), so the demo
+// never drifts from what the tool actually prints.
+const WARN = 60;
+const CRIT = 85;
+const severityClass = (pct: number) =>
+  pct >= CRIT ? 'text-danger' : pct >= WARN ? 'text-[var(--code-number)]' : 'text-primary';
+
 const windows = [
-  { label: '5h', bar: '██░░░', pct: '36%', proj: '→104%', reset: '3h15m' },
-  { label: '7d', bar: '███░░', pct: '62%', proj: '→103%', reset: '2d19h' },
+  { label: '5h', bar: '██░░░', pct: 36, eta: 104, reset: '3h15m' },
+  { label: '7d', bar: '███░░', pct: 62, eta: 103, reset: '2d19h' },
 ];
 ---
 
@@ -18,12 +26,15 @@ const windows = [
       {windows.map((w, i) => (
         <>
           {i > 0 && <span class="text-muted"> │ </span>}
-          <span>{w.label} </span>
-          <span class="text-primary">{w.bar}</span>
-          <span> {w.pct} </span>
-          <span class="text-faint">
-            {w.proj} {w.reset}
+          <span class="text-faint">{w.label}</span>
+          <span> </span>
+          <span class={severityClass(w.pct)}>
+            {w.bar} {w.pct}%
           </span>
+          <span> </span>
+          <span class={severityClass(w.eta)}>→{w.eta}%</span>
+          <span> </span>
+          <span class="text-faint">{w.reset}</span>
         </>
       ))}
       <span class="text-muted"> │ </span>
