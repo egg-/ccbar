@@ -29,21 +29,26 @@ jobs:
       # `base: '/ccbar/'` means the built HTML only resolves correctly when served
       # under that path, so both checks below run against a real preview server
       # instead of scanning dist/ or letting Lighthouse spin its own static root.
-      - run: pnpm preview --host 127.0.0.1 --port 4321
-      - name: Wait for preview server
+      # Backgrounded explicitly (nohup + disown) rather than relying on `astro
+      # preview`'s own daemon mode, which hangs the step in some CI environments.
+      - name: Start preview server
+        timeout-minutes: 1
         run: |
+          nohup pnpm preview --host 127.0.0.1 --port 4321 > /tmp/preview.log 2>&1 &
+          disown
           for i in $(seq 1 30); do
             curl -sf http://127.0.0.1:4321/ccbar/ > /dev/null && exit 0
             sleep 1
           done
           echo "preview server never came up" >&2
+          cat /tmp/preview.log >&2
           exit 1
       # Thresholds (mobile, 95+ on all four categories) live in lighthouserc.cjs
       - run: pnpm dlx @lhci/cli@0.15.1 autorun
       # Internal links only; external ones are somebody else's uptime
       - run: pnpm dlx linkinator@8.1.0 http://127.0.0.1:4321/ccbar/ --recurse --skip '^https?://(?!127\.0\.0\.1)'
       - if: always()
-        run: pnpm exec astro preview stop
+        run: pkill -f 'astro preview' || true
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
