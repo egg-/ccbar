@@ -141,7 +141,10 @@ const capabilities = [
             <li class="border-border grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-b py-4">
               <span class="text-faint pt-0.5 font-mono text-[11px]">{i + 1}</span>
               <div>
-                <pre class="border-border bg-surface overflow-x-auto rounded-[3px] border px-3 py-2 font-mono text-sm">{step.command}</pre>
+                <pre
+                  class="border-border bg-surface overflow-x-auto rounded-[3px] border px-3 py-2 font-mono text-sm"
+                  tabindex="0"
+                >{step.command}</pre>
                 <p class="text-muted mt-2 text-sm">{step.detail}</p>
               </div>
             </li>
