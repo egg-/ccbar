@@ -1,0 +1,39 @@
+---
+// A drawing of the bar itself, in rules and mono text rather than a screenshot: no asset
+// to license, no second file to re-shoot for dark mode, and it stays sharp at any width.
+const windows = [
+  { label: '5h', bar: '██░░░', pct: '36%', proj: '→104%', reset: '3h15m' },
+  { label: '7d', bar: '███░░', pct: '62%', proj: '→103%', reset: '2d19h' },
+];
+---
+
+<figure class="border-border border">
+  <div class="border-border text-faint flex flex-wrap items-baseline gap-x-2 border-b px-3 py-2 font-mono text-[11px]">
+    <span class="text-foreground">~/.claude/settings.json</span>
+    <span>statusLine</span>
+  </div>
+
+  <div class="overflow-x-auto px-3 py-4">
+    <p class="font-mono text-sm whitespace-pre">
+      {windows.map((w, i) => (
+        <>
+          {i > 0 && <span class="text-muted"> │ </span>}
+          <span>{w.label} </span>
+          <span class="text-primary">{w.bar}</span>
+          <span> {w.pct} </span>
+          <span class="text-faint">
+            {w.proj} {w.reset}
+          </span>
+        </>
+      ))}
+      <span class="text-muted"> │ </span>
+      <span class="text-foreground">Opus 5 12%</span>
+      <span class="text-muted"> │ </span>
+      <span class="text-faint">$5.23</span>
+    </p>
+  </div>
+
+  <figcaption class="border-border text-faint border-t px-3 py-2 font-mono text-[11px]">
+    ~22 ms per tick · 0 resident processes · 5 KB install
+  </figcaption>
+</figure>

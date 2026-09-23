@@ -1,0 +1,7 @@
+# Development-only files. They must not reach the published snapshot (git archive).
+
+# A symlink to AGENTS.md, which is the file the README names. git archive writes it as a
+# 9-byte entry, and an unzip that ignores the symlink bit -- Windows Explorer, 7-Zip --
+# leaves a broken file where the guide should be.
+CLAUDE.md export-ignore
+.gitattributes export-ignore
