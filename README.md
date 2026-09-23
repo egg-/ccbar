@@ -2,6 +2,8 @@
 
 A one-file status line for Claude Code. No daemon, no cache, no network, no dependencies.
 
+[egg-.github.io/ccbar](https://egg-.github.io/ccbar/)
+
 ![ccbar status line](docs/bar.svg)
 
 ```
