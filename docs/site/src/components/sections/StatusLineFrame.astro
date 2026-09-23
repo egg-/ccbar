@@ -1,46 +1,61 @@
 ---
-// A drawing of the bar itself, in rules and mono text rather than a screenshot: no asset
-// to license, no second file to re-shoot for dark mode, and it stays sharp at any width.
-// Severity thresholds and grouping mirror ccbar.py's render() line for line (WARN/CRIT =
-// 60/85; the bar+percentage share one severity, the projection has its own), so the demo
+// A real terminal panel, not the site's own light/dark tokens: a terminal's colors don't
+// change with the reader's theme preference, and these are the exact values docs/bar.svg
+// (the README's screenshot) uses for ccbar's ANSI green/yellow/red in a modern terminal.
+// Thresholds and structure mirror quota()/render() in ccbar.py line for line -- the bar and
+// its percentage share one severity, the projection has its own, the window label and the
+// separators are dim, the model name is plain and only its percentage is colored -- so this
 // never drifts from what the tool actually prints.
 const WARN = 60;
 const CRIT = 85;
-const severityClass = (pct: number) =>
-  pct >= CRIT ? 'text-danger' : pct >= WARN ? 'text-[var(--code-number)]' : 'text-primary';
+
+const OK = '#3fb950';
+const CAUTION = '#d29922';
+const HOT = '#f85149';
+const DIM = '#7d8590';
+const FG = '#e6edf3';
+
+const severityColor = (pct: number) => (pct >= CRIT ? HOT : pct >= WARN ? CAUTION : OK);
 
 const windows = [
   { label: '5h', bar: '██░░░', pct: 36, eta: 104, reset: '3h15m' },
   { label: '7d', bar: '███░░', pct: 62, eta: 103, reset: '2d19h' },
 ];
+const context = 12;
 ---
 
-<figure class="border-border border">
+<figure class="border-border overflow-hidden rounded-[3px] border">
   <div class="border-border text-faint flex flex-wrap items-baseline gap-x-2 border-b px-3 py-2 font-mono text-[11px]">
     <span class="text-foreground">~/.claude/settings.json</span>
     <span>statusLine</span>
   </div>
 
-  <div class="overflow-x-auto px-3 py-4">
-    <p class="font-mono text-sm whitespace-pre">
+  <div class="overflow-x-auto p-4" style={`background:#0d1117`}>
+    <div class="mb-3 flex gap-1.5">
+      <span class="inline-block size-2.5 rounded-full" style={`background:${HOT}`}></span>
+      <span class="inline-block size-2.5 rounded-full" style={`background:${CAUTION}`}></span>
+      <span class="inline-block size-2.5 rounded-full" style={`background:${OK}`}></span>
+    </div>
+    <p class="font-mono text-sm whitespace-pre" style={`color:${FG}`}>
       {windows.map((w, i) => (
         <>
-          {i > 0 && <span class="text-muted"> │ </span>}
-          <span class="text-faint">{w.label}</span>
+          {i > 0 && <span style={`color:${DIM}`}> │ </span>}
+          <span style={`color:${DIM}`}>{w.label}</span>
           <span> </span>
-          <span class={severityClass(w.pct)}>
+          <span style={`color:${severityColor(w.pct)}`}>
             {w.bar} {w.pct}%
           </span>
           <span> </span>
-          <span class={severityClass(w.eta)}>→{w.eta}%</span>
+          <span style={`color:${severityColor(w.eta)}`}>→{w.eta}%</span>
           <span> </span>
-          <span class="text-faint">{w.reset}</span>
+          <span style={`color:${DIM}`}>{w.reset}</span>
         </>
       ))}
-      <span class="text-muted"> │ </span>
-      <span class="text-foreground">Opus 5 12%</span>
-      <span class="text-muted"> │ </span>
-      <span class="text-faint">$5.23</span>
+      <span style={`color:${DIM}`}> │ </span>
+      <span>Opus 5 </span>
+      <span style={`color:${severityColor(context)}`}>{context}%</span>
+      <span style={`color:${DIM}`}> │ </span>
+      <span style={`color:${DIM}`}>$5.23</span>
     </p>
   </div>
 
