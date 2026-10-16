@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cp",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/ccbar.py", "${CLAUDE_PLUGIN_DATA}/ccbar.py"]
+          }
+        ]
+      }
+    ]
+  }
+}

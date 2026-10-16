@@ -150,6 +150,16 @@ const capabilities = [
             </li>
           ))}
         </ol>
+        <h3 class="mt-10 text-base font-medium">Or as a Claude Code plugin</h3>
+        <pre
+          class="border-border bg-surface mt-3 overflow-x-auto rounded-[3px] border px-3 py-2 font-mono text-sm"
+          tabindex="0"
+        >{'/plugin install ccbar --marketplace egg-/ccbar\n/ccbar:setup'}</pre>
+        <p class="text-muted mt-2 text-sm">
+          A plugin can't set the status line itself, so /ccbar:setup writes the statusLine entry
+          for you, asking first if one is already there. A session-start hook keeps the copy it
+          points at current across plugin updates. Nothing touches the network.
+        </p>
       </Section>
 
       <Section label="Reading the bar" id="reading" class="mt-24">

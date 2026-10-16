@@ -81,6 +81,30 @@ least actionable number on the line.
 
 ## Install
 
+### As a Claude Code plugin
+
+```
+/plugin install ccbar --marketplace egg-/ccbar
+/ccbar:setup
+```
+
+A plugin can't set the status line itself, so `/ccbar:setup` writes the
+`statusLine` entry in `~/.claude/settings.json` for you, asking first if one is
+already there. What the plugin does, in full:
+
+- **On each new session**, a `SessionStart` hook copies `ccbar.py` into the
+  plugin's data directory (`~/.claude/plugins/data/ccbar-ccbar/`). The status line
+  points there because that path survives plugin updates, so an update reaches
+  the bar on the next session.
+- **`/ccbar:setup`** copies the file once more, edits `statusLine` in your user
+  settings, and nothing else. It only runs when you type it.
+- **Nothing else.** No network, no other files, no permission changes.
+
+Uninstalling deletes the data directory, so remove the `statusLine` entry from
+`~/.claude/settings.json` at the same time, or the bar goes blank.
+
+### By hand
+
 Drop the file somewhere and point Claude Code at it:
 
 ```bash

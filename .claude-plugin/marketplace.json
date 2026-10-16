@@ -1,0 +1,13 @@
+{
+  "name": "ccbar",
+  "description": "ccbar, a one-file status line for Claude Code",
+  "owner": {
+    "name": "egg"
+  },
+  "plugins": [
+    {
+      "name": "ccbar",
+      "source": "./"
+    }
+  ]
+}

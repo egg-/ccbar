@@ -1,0 +1,10 @@
+{
+  "name": "ccbar",
+  "version": "0.1.0",
+  "description": "A one-file status line: plan quota with burn-rate projection, context window, and session cost. No daemon, no network, no dependencies.",
+  "author": { "name": "egg", "url": "https://github.com/egg-" },
+  "homepage": "https://egg-.github.io/ccbar/",
+  "repository": "https://github.com/egg-/ccbar",
+  "license": "MIT",
+  "keywords": ["statusline", "status-line", "quota", "usage"]
+}
