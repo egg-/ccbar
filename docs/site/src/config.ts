@@ -29,6 +29,7 @@ export const nav = {
       links: [
         { label: 'Source', href: 'https://github.com/egg-/ccbar' },
         { label: 'License (MIT)', href: 'https://github.com/egg-/ccbar/blob/main/LICENSE' },
+        { label: 'Privacy', href: '#privacy' },
       ],
     },
   ],

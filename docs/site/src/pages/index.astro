@@ -202,6 +202,30 @@ const capabilities = [
           </span>
         </p>
       </Section>
+
+      <Section label="Privacy" id="privacy" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-[-0.028em]">Nothing leaves your machine.</h2>
+        <div class="text-muted mt-4 space-y-4">
+          <p>
+            ccbar reads the JSON Claude Code pipes to it on stdin, prints one line, and exits. It
+            stores, logs, and sends nothing; there is no network code in it at all.
+          </p>
+          <p>
+            The Claude Code plugin writes in two places and nowhere else: a copy of ccbar.py in its
+            data directory, ~/.claude/plugins/data/ccbar-ccbar/, refreshed when a session starts;
+            and, only when you run /ccbar:setup, the statusLine entry in ~/.claude/settings.json.
+            Uninstalling the plugin deletes the copy.
+          </p>
+          <p>
+            This site is static pages on GitHub Pages with no analytics, no cookies, and
+            self-hosted fonts. GitHub, as the host, sees requests under the{' '}
+            <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">
+              GitHub privacy statement
+            </a>
+            .
+          </p>
+        </div>
+      </Section>
     </div>
 
     <div class="shell-body border-border mt-24 border-t pt-10">
